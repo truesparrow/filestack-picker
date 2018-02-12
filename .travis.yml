@@ -1,0 +1,27 @@
+language: node_js
+
+node_js:
+- "node"
+
+cache:
+  directories:
+    - node_modules
+
+env:
+  global:
+  - GEMFURY_USER=truesparrow
+  # GEMFURY_API_KEY
+  - secure: "sMl7n7aMDnOVvvOfF7jZ6bMqXPLQLFrV+42SQNoRB4nvp/Jm+WpqBRykuF4nR2YjFazjUjD4SdAumSmtPE/N2yyiTua1eDVPz3PBa0t3z/lt62eysTNTEfyJZSZqvPQBPyFnlJStyvN1ZAv5a4Z77WBU2f3uqaEYRsNSNjFDSIpHBZlXE9rcX4qPe/2g0lXXjhY5UCZNgh/Sruf68lSkckRVprYt7shclNFyuqBPAHPdzOW2geu3Z9pZ8MWCYX82dZllu1IUsqthjSXArYH+MUIWMHLYQWrdJEFb2QfJ1tC6kwq06mAmxOqzO9awGPFeCnIDpIX7YXXRQmL/ys01NsJm8GN0+i14BGkom5CT5i4811YZ6plawuhcCk+9DcKqomSwoolj7xNM5K8G9o63YQQyLAkoYX9wDCfijDqEGRagWamNxcBI9zq2SNkcRybvrTkki2MsxJ7uC+8VZcml6UFiJ8JVD4XYpKvmkXvvvuli5ilwCc2RvfcggnGQy/LeAaZORd/AbDe+hp393P/qL6QwMNP9U8GbaziKTJfqKc8saDSxnJS0lr0rPUiBDFJYZRN3k5GFAavRMVa1AQf3srMz4cbyH5V9yJm03Zk38jeWBQoHm61dYKaEcX1ppHWKYW6A96mP0jiBlfSgxGcvHyt+KwOSKWTii4Em9x8BoQ8="
+
+install:
+- npm install --registry=https://npm-proxy.fury.io/${GEMFURY_API_KEY}/${GEMFURY_USER}/ --progress=false
+
+script:
+- true
+
+deploy:
+- provider: script
+  skip_cleanup: true
+  script: $(npm bin)/togemfury --user ${GEMFURY_USER} --api_key ${GEMFURY_API_KEY}
+  on:
+    tags: true

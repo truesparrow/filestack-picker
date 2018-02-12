@@ -1,0 +1,56 @@
+{
+    "name": "@truesparrow/filestack-picker",
+    "version": "0.0.0",
+    "description": "A wrapper for the filestack-picker, tailored for this service",
+    "author": "CHM SQRT2 Team",
+    "scripts": {
+        "build": "tsc",
+        "test-dev": "tsc --watch & mocha --watch $(find out -name '*-test.js')",
+        "test": "tsc && istanbul cover --config ./.istanbul.yml ./node_modules/mocha/bin/_mocha --  $(find out -name '*-test.js') && remap-istanbul -i ./build/coverage/coverage-final.json -o ./build/coverage/coverage-remapped.json && coverage-filter -i ./build/coverage/coverage-remapped.json -o ./build/coverage/coverage-filtered.json",
+        "push-coverage-to-codecov": "codecov -f ./build/coverage/coverage-filtered.json",
+        "docs": "typedoc src/"
+    },
+    "keywords": [
+        "client",
+        "filestack",
+        "sdk"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/truesparrow/filestack-picker.git"
+    },
+    "homepage": "https://github.com/truesparrow/filestack-picker#readme",
+    "license": "MIT",
+    "main": "./index.js",
+    "types": "./index.d.ts",
+    "filesPack": {
+        "out": "e:.",
+        "README.md": "f:README.md",
+        "package.json": "f:package.json",
+        "tsconfig.json": "f:tsconfig.json"
+    },
+    "dependencies": {
+        "@truesparrow/content-sdk-js": "latest",
+        "filepicker-js": "=2.4.18"
+    },
+    "devDependencies": {
+        "@truesparrow/togemfury": "latest",
+        "@types/chai": "=4.0.8",
+        "@types/express": "=4.0.39",
+        "@types/istanbul": "=0.4.29",
+        "@types/mocha": "=2.2.44",
+        "@types/node": "=8.0.57",
+        "@types/supertest": "=2.0.4",
+        "@types/uuid": "=3.4.3",
+        "chai": "=4.1.2",
+        "codecov": "=3.0.0",
+        "coverage-filter": "=1.0.0",
+        "istanbul": "=0.4.5",
+        "mocha": "=4.0.1",
+        "remap-istanbul": "=0.9.5",
+        "supertest": "=3.0.0",
+        "testdouble": "=3.2.6",
+        "typedoc": "=0.9.0",
+        "typescript": "=2.6.2"
+    }
+}
