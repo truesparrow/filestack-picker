@@ -3,7 +3,7 @@ import * as filepicker from 'filepicker-js'
 import { Picture } from '@truesparrow/content-sdk-js'
 
 
-export class FileStackClient {
+export class FileStackPicker {
 
     private readonly _key: string;
 
