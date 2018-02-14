@@ -1,6 +1,6 @@
 import * as filepicker from 'filepicker-js'
 
-import { Picture } from '@truesparrow/content-sdk-js'
+import { Image, Picture } from '@truesparrow/content-sdk-js'
 
 
 export class FileStackPicker {
@@ -22,24 +22,45 @@ export class FileStackPicker {
                     mimetype: 'image/*',
                     services: ['CONVERT', 'COMPUTER', 'FACEBOOK', 'DROPBOX', 'FLICKR'],
                     conversions: ['crop', 'rotate', 'filter'],
-                    imageDim: [Picture.DEFAULT_WIDTH, Picture.DEFAULT_HEIGHT],
+                    imageDim: [Picture.MAIN_WIDTH, Picture.MAIN_HEIGHT],
                     cropRatio: 16 / 9,
                     cropForce: true,
                     maxSize: '10485760'
                 }, (blob: any) => {
                     (filepicker as any).convert(blob, {
-                        width: 1600,
-                        height: 900,
+                        width: Picture.MAIN_WIDTH,
+                        height: Picture.MAIN_HEIGHT,
                         fit: 'scale',
-                        format: 'jpg',
+                        format: Picture.FORMAT,
                         compress: true,
                         quality: 90,
-                    }, (newBlob: any) => {
-                        resolve({
-                            position: position,
-                            uri: newBlob.url,
-                            width: Picture.DEFAULT_WIDTH,
-                            height: Picture.DEFAULT_HEIGHT
+                    }, (mainBlob: any) => {
+                        (filepicker as any).convert(blob, {
+                            width: Picture.THUMBNAIL_WIDTH,
+                            height: Picture.THUMBNAIL_HEIGHT,
+                            fit: 'scale',
+                            format: Picture.FORMAT,
+                            compress: true,
+                            quality: 90
+                        }, (thumbnailBlob: any) => {
+                            const mainImage = new Image();
+                            mainImage.uri = mainBlob.url;
+                            mainImage.format = Picture.FORMAT;
+                            mainImage.width = Picture.MAIN_WIDTH;
+                            mainImage.height = Picture.MAIN_HEIGHT;
+                            const thumbnailImage = new Image();
+                            thumbnailImage.uri = thumbnailBlob.url;
+                            thumbnailImage.format = Picture.FORMAT;
+                            thumbnailImage.width = Picture.THUMBNAIL_WIDTH;
+                            thumbnailImage.height = Picture.THUMBNAIL_HEIGHT;
+                            const picture = new Picture();
+                            picture.position = position;
+                            picture.mainImage = mainImage;
+                            picture.thumbnailImage = thumbnailImage;
+
+                            resolve(picture);
+                        }, (error: Error) => {
+                            reject(error);
                         });
                     }, (error: Error) => {
                         reject(error);
