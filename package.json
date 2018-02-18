@@ -1,6 +1,6 @@
 {
     "name": "@truesparrow/filestack-picker",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "description": "A wrapper for the filestack-picker, tailored for this service",
     "author": "CHM SQRT2 Team",
     "scripts": {
