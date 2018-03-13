@@ -22,7 +22,7 @@ declare global {
     }
 }
 
-window.TRUESPARROW_SELECT_IMAGE = (key: string, position: number) => {
+window.TRUESPARROW_SELECT_IMAGE = window.TRUESPARROW_SELECT_IMAGE || ((key: string, position: number) => {
     return new Promise(
         (resolve, reject) => {
             (filepicker as any).setKey(key);
@@ -77,7 +77,7 @@ window.TRUESPARROW_SELECT_IMAGE = (key: string, position: number) => {
                 reject(error);
             });
         });
-};
+});
 
 
 export class FileStackPicker {
