@@ -25,7 +25,7 @@ declare global {
 window.TRUESPARROW_SELECT_IMAGE = window.TRUESPARROW_SELECT_IMAGE || ((key: string, position: number) => {
     return new Promise(
         (resolve, reject) => {
-            const client = (filestack as any).init(key);
+            const client = (filestack as any).default.init(key);
             client
                 .pick({
                     fromSources: ["local_file_system", "facebook", "instagram", "googledrive", "dropbox", "flickr", "box", "picasa"],
