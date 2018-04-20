@@ -28,7 +28,7 @@ window.TRUESPARROW_SELECT_IMAGE = window.TRUESPARROW_SELECT_IMAGE || ((key: stri
             const client = (filestack as any).default.init(key);
             client
                 .pick({
-                    fromSources: ["local_file_system", "facebook", "instagram", "googledrive", "dropbox", "flickr", "box", "picasa"],
+                    fromSources: ["local_file_system", "facebook", "instagram", "picasa", "flickr", "dropbox", "googledrive", "box"],
                     accept: ["image/*"],
                     lang: 'en',
                     transformations: {
