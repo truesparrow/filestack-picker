@@ -1,6 +1,6 @@
 import * as filestack from 'filestack-js'
 
-import { Image, Picture } from '@truesparrow/content-sdk-js'
+import { Image, Picture, PictureSet } from '@truesparrow/content-sdk-js'
 
 
 /**
@@ -18,7 +18,7 @@ import { Image, Picture } from '@truesparrow/content-sdk-js'
 
 declare global {
     interface Window {
-        TRUESPARROW_SELECT_IMAGE: (key: string, position: number) => Promise<Picture>;
+        TRUESPARROW_SELECT_IMAGE: (key: string, position: number) => Promise<Picture[]>;
     }
 }
 
@@ -31,6 +31,7 @@ window.TRUESPARROW_SELECT_IMAGE = window.TRUESPARROW_SELECT_IMAGE || ((key: stri
                     fromSources: ["local_file_system", "facebook", "instagram", "picasa", "flickr", "dropbox", "googledrive", "box"],
                     accept: ["image/*"],
                     lang: 'en',
+                    maxFiles: PictureSet.MAX_NUMBER_OF_PICTURES,
                     transformations: {
                         crop: {
                             force: true,
@@ -41,63 +42,71 @@ window.TRUESPARROW_SELECT_IMAGE = window.TRUESPARROW_SELECT_IMAGE || ((key: stri
                     maxSize: 10485760
                 })
                 .then((res: any) => {
-                    const uploaded = res.filesUploaded[0];
-
-                    const mainSizeUri = client.transform(uploaded.url, {
-                        resize: {
-                            width: Picture.MAIN_WIDTH,
-                            height: Picture.MAIN_HEIGHT,
-                            fit: 'scale',
-                        },
-                        output: {
-                            format: Picture.FORMAT,
-                            compress: true,
-                            quality: 90
-                        }
-                    });
-
-                    client
-                        .storeURL(mainSizeUri)
-                        .then((mainRes: any) => {
-                            const thumbnailSizeUri = client.transform(uploaded.url, {
-                                resize: {
-                                    width: Picture.THUMBNAIL_WIDTH,
-                                    height: Picture.THUMBNAIL_HEIGHT,
-                                    fit: 'scale',
-                                },
-                                output: {
-                                    format: Picture.FORMAT,
-                                    compress: true,
-                                    quality: 90
-                                }
-                            });
-
-                            client
-                                .storeURL(thumbnailSizeUri)
-                                .then((thumbnailRes: any) => {
-                                    const mainImage = new Image();
-                                    mainImage.uri = mainRes.url;
-                                    mainImage.format = Picture.FORMAT;
-                                    mainImage.width = Picture.MAIN_WIDTH;
-                                    mainImage.height = Picture.MAIN_HEIGHT;
-                                    const thumbnailImage = new Image();
-                                    thumbnailImage.uri = thumbnailRes.url;
-                                    thumbnailImage.format = Picture.FORMAT;
-                                    thumbnailImage.width = Picture.THUMBNAIL_WIDTH;
-                                    thumbnailImage.height = Picture.THUMBNAIL_HEIGHT;
-                                    const picture = new Picture();
-                                    picture.position = position;
-                                    picture.mainImage = mainImage;
-                                    picture.thumbnailImage = thumbnailImage;
-
-                                    resolve(picture);
-                                })
-                                .catch((err: any) => reject(err));
-                        })
+                    Promise
+                        .all<Picture>(res.filesUploaded.map((fi: any) => processOneImage(client, fi.url)))
+                        .then(pictures => resolve(pictures))
                         .catch((err: any) => reject(err));
                 })
                 .catch((err: any) => reject(err));
         });
+
+    function processOneImage(client: any, url: string): Promise<Picture> {
+        return new Promise(
+            (resolve, reject) => {
+                const mainSizeUri = client.transform(url, {
+                    resize: {
+                        width: Picture.MAIN_WIDTH,
+                        height: Picture.MAIN_HEIGHT,
+                        fit: 'scale',
+                    },
+                    output: {
+                        format: Picture.FORMAT,
+                        compress: true,
+                        quality: 90
+                    }
+                });
+
+                client
+                    .storeURL(mainSizeUri)
+                    .then((mainRes: any) => {
+                        const thumbnailSizeUri = client.transform(url, {
+                            resize: {
+                                width: Picture.THUMBNAIL_WIDTH,
+                                height: Picture.THUMBNAIL_HEIGHT,
+                                fit: 'scale',
+                            },
+                            output: {
+                                format: Picture.FORMAT,
+                                compress: true,
+                                quality: 90
+                            }
+                        });
+
+                        client
+                            .storeURL(thumbnailSizeUri)
+                            .then((thumbnailRes: any) => {
+                                const mainImage = new Image();
+                                mainImage.uri = mainRes.url;
+                                mainImage.format = Picture.FORMAT;
+                                mainImage.width = Picture.MAIN_WIDTH;
+                                mainImage.height = Picture.MAIN_HEIGHT;
+                                const thumbnailImage = new Image();
+                                thumbnailImage.uri = thumbnailRes.url;
+                                thumbnailImage.format = Picture.FORMAT;
+                                thumbnailImage.width = Picture.THUMBNAIL_WIDTH;
+                                thumbnailImage.height = Picture.THUMBNAIL_HEIGHT;
+                                const picture = new Picture();
+                                picture.position = position;
+                                picture.mainImage = mainImage;
+                                picture.thumbnailImage = thumbnailImage;
+
+                                resolve(picture);
+                            })
+                            .catch((err: any) => reject(err));
+                    })
+                    .catch((err: any) => reject(err));
+            });
+    }
 });
 
 
@@ -109,7 +118,7 @@ export class FileStackPicker {
         this._key = key;
     }
 
-    selectImageWithWidget(position: number): Promise<Picture> {
+    selectImageWithWidget(position: number): Promise<Picture[]> {
         return window.TRUESPARROW_SELECT_IMAGE(this._key, position);
     }
 }
