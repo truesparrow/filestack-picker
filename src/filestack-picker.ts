@@ -22,7 +22,7 @@ declare global {
     }
 }
 
-window.TRUESPARROW_SELECT_IMAGE = window.TRUESPARROW_SELECT_IMAGE || ((key: string, position: number) => {
+window.TRUESPARROW_SELECT_IMAGE = window.TRUESPARROW_SELECT_IMAGE || ((key: string, basePosition: number) => {
     return new Promise(
         (resolve, reject) => {
             const client = (filestack as any).default.init(key);
@@ -43,14 +43,14 @@ window.TRUESPARROW_SELECT_IMAGE = window.TRUESPARROW_SELECT_IMAGE || ((key: stri
                 })
                 .then((res: any) => {
                     Promise
-                        .all<Picture>(res.filesUploaded.map((fi: any) => processOneImage(client, fi.url)))
+                        .all<Picture>(res.filesUploaded.map((fi: any, index: number) => processOneImage(client, fi.url, basePosition + index)))
                         .then(pictures => resolve(pictures))
                         .catch((err: any) => reject(err));
                 })
                 .catch((err: any) => reject(err));
         });
 
-    function processOneImage(client: any, url: string): Promise<Picture> {
+    function processOneImage(client: any, url: string, newPosition: number): Promise<Picture> {
         return new Promise(
             (resolve, reject) => {
                 const mainSizeUri = client.transform(url, {
@@ -96,7 +96,7 @@ window.TRUESPARROW_SELECT_IMAGE = window.TRUESPARROW_SELECT_IMAGE || ((key: stri
                                 thumbnailImage.width = Picture.THUMBNAIL_WIDTH;
                                 thumbnailImage.height = Picture.THUMBNAIL_HEIGHT;
                                 const picture = new Picture();
-                                picture.position = position;
+                                picture.position = newPosition;
                                 picture.mainImage = mainImage;
                                 picture.thumbnailImage = thumbnailImage;
 
@@ -118,7 +118,7 @@ export class FileStackPicker {
         this._key = key;
     }
 
-    selectImageWithWidget(position: number): Promise<Picture[]> {
-        return window.TRUESPARROW_SELECT_IMAGE(this._key, position);
+    selectImageWithWidget(basePosition: number): Promise<Picture[]> {
+        return window.TRUESPARROW_SELECT_IMAGE(this._key, basePosition);
     }
 }
