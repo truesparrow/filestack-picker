@@ -18,11 +18,12 @@ import { Image, Picture, PictureSet } from '@truesparrow/content-sdk-js'
 
 declare global {
     interface Window {
-        TRUESPARROW_SELECT_IMAGE: (key: string, position: number) => Promise<Picture[]>;
+        // TODO: figure out a nicer interface than this callback. Perhaps return Promise<{count: number}, Promise<Picture[]>>?
+        TRUESPARROW_SELECT_IMAGE: (key: string, position: number, onImagesSelected?: (count: number) => void) => Promise<Picture[]>;
     }
 }
 
-window.TRUESPARROW_SELECT_IMAGE = window.TRUESPARROW_SELECT_IMAGE || ((key: string, basePosition: number) => {
+window.TRUESPARROW_SELECT_IMAGE = window.TRUESPARROW_SELECT_IMAGE || ((key: string, basePosition: number, onImagesSelected?: (count: number) => void) => {
     return new Promise(
         (resolve, reject) => {
             const client = (filestack as any).default.init(key);
@@ -42,6 +43,10 @@ window.TRUESPARROW_SELECT_IMAGE = window.TRUESPARROW_SELECT_IMAGE || ((key: stri
                     maxSize: 10485760
                 })
                 .then((res: any) => {
+                    if (onImagesSelected != undefined) {
+                        onImagesSelected(res.filesUploaded.length);
+                    }
+
                     Promise
                         .all<Picture>(res.filesUploaded.map((fi: any, index: number) => processOneImage(client, fi.url, basePosition + index)))
                         .then(pictures => resolve(pictures))
@@ -118,7 +123,7 @@ export class FileStackPicker {
         this._key = key;
     }
 
-    selectImageWithWidget(basePosition: number): Promise<Picture[]> {
-        return window.TRUESPARROW_SELECT_IMAGE(this._key, basePosition);
+    selectImageWithWidget(basePosition: number, onImagesSelected?: (count: number) => void): Promise<Picture[]> {
+        return window.TRUESPARROW_SELECT_IMAGE(this._key, basePosition, onImagesSelected);
     }
 }
